@@ -1,0 +1,108 @@
+﻿@page "/salary"
+@using Abp.BuisnessPortal;
+@using Bp.Localization;
+@using Bp.Posts;
+@using Bp.PostsSalary;
+@using Bp.Regions;
+@using Microsoft.Extensions.Localization;
+@using Volo.Abp.MultiTenancy
+@inherits BpComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IPostsSalaryAppService salaryService
+@inject IStringLocalizer<BpResource> L
+@inject IJSRuntime JS
+
+
+
+<h3>@L["SalaryOverview"]</h3>
+
+<h4>@L["CandidateForm"]</h4>
+
+<EditForm Model="@input" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label for="name">@L["FirstName"]</label>
+        <InputText id="name" @bind-Value="@input.FirstName" class="form-control" />
+        <ValidationMessage For="@(() => input.FirstName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="firstName">@L["LastName"]</label>
+        <InputText id="firstName" @bind-Value="@input.LastName" class="form-control" />
+        <ValidationMessage For="@(() => input.LastName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="birthdate">@L["BirthDate"]</label>
+        <InputDate id="birthdate" @bind-Value="@input.BirthDate" class="form-control" />
+        <ValidationMessage For="@(() => input.BirthDate)" />
+    </div>
+
+    <div class="form-group">
+        <label for="employeeNumber">@L["EmpNumber"]</label>
+        <InputNumber id="employeeNumber" @bind-Value="@input.EmployeeNumber" class="form-control" />
+        <ValidationMessage For="@(() => input.EmployeeNumber)" />
+    </div>
+
+    <div class="form-group">
+        <label for="post">@L["PostName"]</label>
+        <select id="post"  @onchange="HandlePostNameChange" class="form-control">
+            @foreach (var post in posts.Select(p => p.Name))
+            {
+                <option value="@post">@post</option>
+            }
+        </select>
+        <ValidationMessage For="@(() => input.PostName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="experience">@L["Experience"]</label>
+        <InputNumber id="experience" @bind-Value="@input.Experience" class="form-control" />
+        <ValidationMessage For="@(() => input.Experience)" />
+    </div>
+
+    <div class="form-group">
+        <label for="region">@L["Region"]</label>
+        <select id="region" @bind="@input.Region" class="form-control">
+            @foreach (var region in regions.Select(r => r.Name))
+            {
+                <option value="@region">@region</option>
+            }
+        </select>
+        <ValidationMessage For="@(() => input.Region)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">@L["Sumbit"]</button>
+</EditForm>
+<Div>
+    <h1>@L["SalaryRange"]: @($"{minSalary:C} - {maxSalary:C}")</h1>
+</Div>
+
+@code {
+    private decimal minSalary;
+    private decimal maxSalary;
+    private CalculateSalaryDto input = new CalculateSalaryDto();
+    private IEnumerable<PostsDto> posts = new List<PostsDto>();
+    private IEnumerable<RegionsDto> regions = new List<RegionsDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        posts = await salaryService.GetPostsList();
+        regions = await salaryService.GetRegionsListByPostName(posts.FirstOrDefault()?.Name);
+        input.PostName = posts.FirstOrDefault()?.Name;
+        input.Region = regions.FirstOrDefault().Name;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        (minSalary,maxSalary) = await salaryService.GetSalaryRange(input);
+        return;
+    }
+
+    private async Task HandlePostNameChange(ChangeEventArgs args)
+    {
+        input.PostName = args.Value.ToString();
+        regions = await salaryService.GetRegionsListByPostName(input.PostName);
+    }
+}

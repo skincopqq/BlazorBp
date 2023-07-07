@@ -1,0 +1,20 @@
+{
+  "culture": "en",
+  "texts": {
+    "Menu:Home": "Home",
+    "Welcome": "Welcome",
+    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
+    "FirstName": "Name",
+    "LastName": "Surname",
+    "BirthDate": "Date of birth",
+    "EmpNumber": "Employer number",
+    "PostName": "Name of post",
+    "Experience": "Experience",
+    "Region": "Region",
+    "Sumbit": "Sumbit",
+    "SalaryRange": "Salary range",
+    "SalaryOverview": "Salary overview",
+    "CandidateForm": "Candidate form"
+
+  }
+}
